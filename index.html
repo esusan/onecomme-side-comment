@@ -1,0 +1,410 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>side-comment 設定</title>
+<meta name="description" content="わんコメ用コメントテンプレート side-comment の見た目を決めて、OBSに貼るURLを作るページ">
+<style>
+  :root {
+    --bg: #14161a;
+    --panel: #1d2026;
+    --line: #2e333b;
+    --text: #e8eaee;
+    --muted: #9aa1ab;
+    --accent: #3ee8f0;
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Noto Sans JP", "Yu Gothic UI", "Hiragino Sans", sans-serif;
+    font-size: 15px;
+    line-height: 1.7;
+  }
+  main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
+  h1 { font-size: 22px; margin: 0 0 4px; }
+  h2 { font-size: 17px; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  p { margin: 0 0 12px; }
+  .lead { color: var(--muted); margin-bottom: 24px; }
+  a { color: var(--accent); }
+  code { background: var(--panel); padding: 1px 6px; border-radius: 4px; font-size: .92em; word-break: break-all; }
+
+  .layout { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 24px; align-items: start; }
+  @media (max-width: 760px) { .layout { grid-template-columns: 1fr; } }
+
+  .form { display: grid; gap: 14px; }
+  .field { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; }
+  .field > label, .field > .label { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; margin-bottom: 6px; }
+  .field .value { color: var(--accent); font-variant-numeric: tabular-nums; }
+  .field .hint { color: var(--muted); font-size: 13px; margin: 6px 0 0; }
+  input[type=range] { width: 100%; accent-color: var(--accent); }
+  input[type=color] { width: 56px; height: 32px; border: 0; padding: 0; background: none; cursor: pointer; }
+  .choices { display: flex; flex-wrap: wrap; gap: 6px; }
+  .choices label { cursor: pointer; }
+  .choices input { position: absolute; opacity: 0; }
+  .choices span { display: inline-block; padding: 4px 12px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); }
+  .choices input:checked + span { border-color: var(--accent); color: var(--text); background: rgba(62, 232, 240, .12); }
+  .choices input:focus-visible + span { outline: 2px solid var(--accent); outline-offset: 2px; }
+  .row { display: flex; align-items: center; gap: 10px; }
+
+  .preview-wrap { position: sticky; top: 16px; }
+  .preview-bg { display: flex; gap: 6px; margin-bottom: 8px; }
+  .stage {
+    height: 560px;
+    border: 1px solid var(--line);
+    border-radius: 8px;
+    overflow: hidden;
+    display: flex;
+    justify-content: flex-end;
+  }
+  .stage.left { justify-content: flex-start; }
+  .stage.dark { background: linear-gradient(160deg, #2b3340, #0d1015); }
+  .stage.bright { background: linear-gradient(160deg, #f4f7fb, #c9d4e0); }
+  .stage.check { background: repeating-conic-gradient(#3a3d42 0 25%, #2a2c30 0 50%) 0 0 / 20px 20px; }
+  .stage iframe { border: 0; height: 100%; background: transparent; display: block; }
+  .size-note { color: var(--muted); font-size: 13px; margin-top: 8px; }
+
+  .output { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px; }
+  .output code { display: block; background: #0f1114; padding: 10px 12px; margin-bottom: 10px; font-size: 14px; }
+  button, .button {
+    display: inline-block;
+    background: var(--accent);
+    color: #071214;
+    border: 0;
+    border-radius: 6px;
+    padding: 8px 16px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+    text-decoration: none;
+  }
+  button.secondary { background: transparent; color: var(--text); border: 1px solid var(--line); font-weight: 600; }
+  .copied { color: var(--accent); margin-left: 8px; font-size: 13px; }
+  .steps > li { margin-bottom: 14px; }
+  .steps > li > p { margin: 0 0 8px; }
+  .steps .output { margin-bottom: 6px; }
+  .steps .hint { color: var(--muted); font-size: 13px; margin: 0; }
+  .swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
+  .swatch {
+    width: 32px;
+    height: 32px;
+    padding: 0;
+    border-radius: 50%;
+    border: 2px solid var(--line);
+    cursor: pointer;
+  }
+  .swatch[aria-pressed="true"] { outline: 2px solid var(--text); outline-offset: 2px; }
+  .width-callout {
+    margin: 10px 0 0;
+    padding: 8px 10px;
+    border-left: 3px solid var(--accent);
+    background: rgba(62, 232, 240, .07);
+    font-size: 13px;
+  }
+  .rec-w {
+    display: inline-block;
+    padding: 0 6px;
+    border-radius: 4px;
+    color: var(--accent);
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+  }
+  .rec-w.changed { animation: rec-flash 900ms ease-out; }
+  @keyframes rec-flash {
+    0% { background: rgba(62, 232, 240, .55); color: #071214; }
+    100% { background: transparent; color: var(--accent); }
+  }
+  .size-note { font-size: 14px; color: var(--text); }
+  ol, ul { padding-left: 1.4em; margin: 0 0 12px; }
+  li { margin-bottom: 4px; }
+  dt { font-weight: 700; margin-top: 12px; }
+  dd { margin: 4px 0 0; color: var(--muted); }
+  footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
+</style>
+</head>
+<body>
+<main>
+  <h1>side-comment</h1>
+  <p class="lead">わんコメ用のコメント表示テンプレートです。画面の端に縦長に置いて、アイコンとコメントを表示します。ここで見た目を決めると、OBSに貼るURLができます。</p>
+
+  <h2>見た目を決める</h2>
+  <div class="layout">
+    <form class="form" id="form" onsubmit="return false">
+      <div class="field">
+        <label for="size">文字の大きさ <span class="value" id="size-v"></span></label>
+        <input type="range" id="size" min="14" max="48" step="1" value="24">
+      </div>
+      <div class="field">
+        <label for="cols">1行の文字数 <span class="value" id="cols-v"></span></label>
+        <input type="range" id="cols" min="4" max="20" step="1" value="8">
+        <p class="hint">全角での数です。半角の英数字は2文字で全角1文字分になります。</p>
+        <p class="width-callout">文字の大きさ・1行の文字数・アイコンを変えると、OBSのブラウザソースの幅も合わせて変える必要があります。今の設定に合う幅は <span class="rec-w"></span> です。</p>
+      </div>
+      <div class="field">
+        <label for="lines">最大の行数 <span class="value" id="lines-v"></span></label>
+        <input type="range" id="lines" min="1" max="10" step="1" value="5">
+        <p class="hint">これより長いコメントは「…」で省略します。</p>
+      </div>
+      <div class="field">
+        <div class="label">寄せる側</div>
+        <div class="choices">
+          <label><input type="radio" name="side" value="right" checked><span>右端</span></label>
+          <label><input type="radio" name="side" value="left"><span>左端</span></label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">フォント</div>
+        <div class="choices">
+          <label><input type="radio" name="font" value="udev" checked><span>UDEV Gothic（同梱）</span></label>
+          <label><input type="radio" name="font" value="bizud"><span>BIZ UDゴシック</span></label>
+          <label><input type="radio" name="font" value="sans"><span>游ゴシックなど</span></label>
+        </div>
+        <p class="hint">上の2つは等幅で、行の端がそろいます。BIZ UDゴシックはWindowsに入っています。游ゴシックなどは端がそろいません。</p>
+      </div>
+      <div class="field">
+        <div class="label">ラインの色 <span class="value" id="accent-v"></span></div>
+        <div class="swatches" id="swatches" role="group" aria-label="色の候補"></div>
+        <div class="row"><input type="color" id="accent" value="#ffffff" aria-label="色を自由に選ぶ"><span class="hint" style="margin:0">候補にない色はここで選べます</span></div>
+      </div>
+      <div class="field">
+        <label for="bg">背景の黒の濃さ <span class="value" id="bg-v"></span></label>
+        <input type="range" id="bg" min="0" max="100" step="5" value="65">
+        <p class="hint">明るいゲーム画面で読みにくいときは濃くしてください。</p>
+      </div>
+      <div class="field">
+        <div class="label">アイコン</div>
+        <div class="choices">
+          <label><input type="radio" name="icon" value="1" checked><span>出す</span></label>
+          <label><input type="radio" name="icon" value="0"><span>出さない</span></label>
+        </div>
+      </div>
+      <div class="field">
+        <div class="label">名前</div>
+        <div class="choices">
+          <label><input type="radio" name="name" value="0" checked><span>出さない</span></label>
+          <label><input type="radio" name="name" value="1"><span>コメントの上に出す</span></label>
+        </div>
+        <p class="hint">長い名前は1行に収まるところで省略します。色はラインと同じです。わんコメであだ名を付けた人はあだ名で表示されます。</p>
+      </div>
+      <div class="field" id="namescale-field" hidden>
+        <label for="namescale">名前の大きさ <span class="value" id="namescale-v"></span></label>
+        <input type="range" id="namescale" min="40" max="100" step="5" value="60">
+        <p class="hint">コメントの文字に対しての大きさです。</p>
+      </div>
+      <div class="field">
+        <label for="life">コメントを消すまで <span class="value" id="life-v"></span></label>
+        <input type="range" id="life" min="0" max="300" step="10" value="0">
+        <p class="hint">0は時間では消しません（新しいコメントに押し出されて上へ消えます）。</p>
+      </div>
+      <div class="field">
+        <label for="max">同時に出す件数 <span class="value" id="max-v"></span></label>
+        <input type="range" id="max" min="3" max="30" step="1" value="12">
+      </div>
+    </form>
+
+    <div class="preview-wrap">
+      <div class="preview-bg choices" role="radiogroup" aria-label="プレビューの背景">
+        <label><input type="radio" name="stagebg" value="dark" checked><span>暗い画面</span></label>
+        <label><input type="radio" name="stagebg" value="bright"><span>明るい画面</span></label>
+        <label><input type="radio" name="stagebg" value="check"><span>透過</span></label>
+      </div>
+      <div class="stage dark" id="stage"><iframe id="preview" title="プレビュー"></iframe></div>
+      <p class="size-note" id="size-note"></p>
+    </div>
+  </div>
+
+  <h2>使い方</h2>
+  <ol class="steps">
+    <li>
+      <p>テンプレートをダウンロードして展開します。最初に1回だけで大丈夫です。</p>
+      <div class="output">
+        <button type="button" id="download">テンプレートをダウンロード（zip）</button>
+        <span class="copied" id="download-status"></span>
+      </div>
+    </li>
+    <li>中の <code>side-comment</code> フォルダを <code>%APPDATA%\onecomme\templates\custom\</code> に入れます（エクスプローラーのアドレス欄にこのパスを貼ると開けます）。</li>
+    <li>わんコメのテンプレート画面を開きます。side-comment が出ていなければ、わんコメを起動し直してください。</li>
+    <li>
+      <p>OBSにブラウザソースを追加し、「ローカルファイル」のチェックを外したまま、URLにこれを貼ります。上で選んだ見た目が入っています。</p>
+      <div class="output">
+        <code id="url"></code>
+        <button type="button" id="copy">コピー</button><span class="copied" id="copied" hidden>コピーしました</span>
+      </div>
+      <p class="hint">わんコメのポートを11180から変えている場合は、URLの数字をご自分のものに書き換えてください。</p>
+    </li>
+    <li>同じ画面で、ブラウザソースの幅を <span class="rec-w"></span> にします。高さはお好みの長さで大丈夫です（コメントは下から積み上がり、入りきらない分は上に消えます）。画面の端に寄せて置きます。</li>
+  </ol>
+  <p>見た目を変えたくなったら、上で選び直して4のURLを貼り直します。文字の大きさ・1行の文字数・アイコンを変えたときは、5の幅も変えてください。わんコメのテンプレート画面からOBSへドラッグしても動きますが、その場合はURLの設定が付かず、ダウンロードしたときの設定で表示されます。</p>
+
+  <h2>コメントが出ないとき</h2>
+  <dl>
+    <dt>赤い枠で「コメントを受け取れません」と表示される</dt>
+    <dd>side-comment フォルダが <code>%APPDATA%\onecomme\templates\custom\</code> の外にあります。そこに入れて、URLで開き直してください。</dd>
+    <dt>見た目が変わらない</dt>
+    <dd>ブラウザソースが「ローカルファイル」指定になっている（わんコメからドラッグして入れるとこうなります）と、URLの設定は付きません。チェックを外して、URLを貼ってください。URLを貼り直しても変わらないときは、ソースのプロパティで「現在のページのキャッシュを更新」を押してください。</dd>
+    <dt>わんコメには流れるのに、OBSに出ない</dt>
+    <dd>わんコメの配信枠の「書き出し」がオフになっていないか確認してください。オフの枠のコメントはテンプレートに送られません。わんコメのコメントテスターは枠に属さないため、書き出しがオフでも表示されます。テスターでは出るのに配信のコメントが出ないときは、まずここを確認してください。</dd>
+    <dt>限定公開の配信でテストしている</dt>
+    <dd>わんコメは限定公開の配信のコメントを取得できません。テストは公開の配信で行ってください。</dd>
+    <dt>前の配信のコメントが出ない</dt>
+    <dd>前の配信の分が残らないように、OBSで読み込んだ時点から1時間より前のコメントは表示しないようにしています。</dd>
+    <dt>スパチャやギフトが出ない</dt>
+    <dd>本文のないもの（金額だけのスパチャなど）は表示しません。本文があれば表示されます。</dd>
+  </dl>
+
+  <footer>
+    作った人：えすさん ／ ソース：<a href="https://github.com/esusan/onecomme-side-comment">GitHub</a><br>
+    コードはMITライセンスです。同梱フォント UDEV Gothic（© Yuko OTAWARA）は SIL Open Font License 1.1 です。
+  </footer>
+</main>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+<script>
+  const DEFAULTS = { size: 24, cols: 8, lines: 5, side: 'right', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '0', namescale: 60, life: 0, max: 12 }
+  const $ = (id) => document.getElementById(id)
+  const radio = (name) => document.querySelector(`input[name="${name}"]:checked`).value
+
+  function read() {
+    return {
+      size: Number($('size').value),
+      cols: Number($('cols').value),
+      lines: Number($('lines').value),
+      side: radio('side'),
+      font: radio('font'),
+      accent: $('accent').value.replace('#', '').toLowerCase(),
+      bg: Number($('bg').value),
+      icon: radio('icon'),
+      name: radio('name'),
+      // 名前を出さないときは大きさをURLに入れない
+      namescale: radio('name') === '1' ? Number($('namescale').value) : DEFAULTS.namescale,
+      life: Number($('life').value),
+      max: Number($('max').value),
+    }
+  }
+
+  // 既定値と違うものだけURLに入れる
+  function query(s) {
+    const q = new URLSearchParams()
+    for (const k of Object.keys(DEFAULTS)) if (String(s[k]) !== String(DEFAULTS[k])) q.set(k, s[k])
+    return q.toString()
+  }
+
+  // テンプレートのCSSと同じ計算：ライン3 + 左右の余白 + アイコン + 間 + 文字幅
+  function recommendedWidth(s) {
+    const avatar = s.icon === '1' ? Math.round(s.size * 4 / 3) + 5 : 0
+    const pad = s.side === 'right' ? 13 : 15
+    return Math.ceil((3 + pad + avatar + s.cols * s.size + 2) / 10) * 10
+  }
+
+  let timer
+  let lastWidth = null
+  function update() {
+    const s = read()
+    $('size-v').textContent = s.size + 'px'
+    $('cols-v').textContent = s.cols + '文字'
+    $('lines-v').textContent = s.lines + '行'
+    $('accent-v').textContent = '#' + s.accent
+    document.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.hex === s.accent)))
+    $('bg-v').textContent = s.bg + '%'
+    $('namescale-field').hidden = s.name !== '1'
+    $('namescale-v').textContent = $('namescale').value + '%'
+    $('life-v').textContent = s.life === 0 ? '消さない' : s.life + '秒'
+    $('max-v').textContent = s.max + '件'
+
+    const q = query(s)
+    const url = 'http://localhost:11180/templates/custom/side-comment/' + (q ? '?' + q : '')
+    $('url').textContent = url
+
+    const w = recommendedWidth(s)
+    $('size-note').innerHTML = `OBSのブラウザソースの幅：<span class="rec-w"></span>`
+    // 幅が変わったら、出ている所をすべて書き換えて一瞬光らせる
+    const changed = lastWidth !== null && lastWidth !== w
+    lastWidth = w
+    document.querySelectorAll('.rec-w').forEach((el) => {
+      el.textContent = w + 'px'
+      if (changed) { el.classList.remove('changed'); void el.offsetWidth; el.classList.add('changed') }
+    })
+    $('stage').classList.toggle('left', s.side === 'left')
+
+    clearTimeout(timer)
+    timer = setTimeout(() => {
+      const frame = $('preview')
+      frame.style.width = w + 'px'
+      frame.src = 'side-comment/index.html?demo=1' + (q ? '&' + q : '')
+    }, 250)
+  }
+
+  document.querySelectorAll('#form input').forEach((el) => el.addEventListener('input', update))
+  document.querySelectorAll('input[name="stagebg"]').forEach((el) =>
+    el.addEventListener('change', () => { $('stage').className = 'stage ' + el.value + (radio('side') === 'left' ? ' left' : '') })
+  )
+  // ラインの色の候補。押すとその色になる
+  const SWATCHES = [
+    ['白', 'ffffff'], ['シアン', '3ee8f0'], ['ピンク', 'ff6fa8'], ['オレンジ', 'ff9a3d'],
+    ['黄', 'ffd84a'], ['緑', '5ee07a'], ['紫', 'a98bff'], ['赤', 'ff5a5a'],
+  ]
+  for (const [label, hex] of SWATCHES) {
+    const b = document.createElement('button')
+    b.type = 'button'
+    b.className = 'swatch'
+    b.style.background = '#' + hex
+    b.title = label
+    b.setAttribute('aria-label', label)
+    b.dataset.hex = hex
+    b.addEventListener('click', () => { $('accent').value = '#' + hex; update() })
+    $('swatches').appendChild(b)
+  }
+  $('copy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText($('url').textContent)
+    } catch {
+      const r = document.createRange(); r.selectNodeContents($('url'))
+      const sel = getSelection(); sel.removeAllRanges(); sel.addRange(r); document.execCommand('copy')
+    }
+    $('copied').hidden = false
+    setTimeout(() => { $('copied').hidden = true }, 1500)
+  })
+  // 選んだ設定を config.js に書いて、テンプレートのファイルと一緒にzipにする
+  const TEMPLATE_FILES = ['index.html', 'script.js', 'style.css', 'template.json', 'fonts/UDEVGothic-Bold.ttf', 'fonts/LICENSE_UDEVGothic.txt']
+  function configJs(s) {
+    const cfg = {}
+    for (const k of Object.keys(DEFAULTS)) if (String(s[k]) !== String(DEFAULTS[k])) cfg[k] = s[k]
+    return '// side-comment の設定です。設定ページ（https://esusan.github.io/onecomme-side-comment/）で作りました\n' +
+      '// URLに設定を付けて開いた場合は、URLの設定が優先されます\n' +
+      'window.SIDE_COMMENT_CONFIG = ' + JSON.stringify(cfg, null, 2) + '\n'
+  }
+  $('download').addEventListener('click', async () => {
+    const btn = $('download')
+    btn.disabled = true
+    $('download-status').textContent = '準備しています…'
+    try {
+      const zip = new JSZip()
+      const dir = zip.folder('side-comment')
+      for (const f of TEMPLATE_FILES) {
+        const res = await fetch('side-comment/' + f)
+        if (!res.ok) throw new Error(f)
+        dir.file(f, await res.arrayBuffer())
+      }
+      dir.file('config.js', configJs(read()))
+      const lic = await fetch('LICENSE')
+      if (lic.ok) dir.file('LICENSE.txt', await lic.text())
+      const blob = await zip.generateAsync({ type: 'blob', compression: 'DEFLATE', compressionOptions: { level: 6 } })
+      const a = document.createElement('a')
+      a.href = URL.createObjectURL(blob)
+      a.download = 'side-comment.zip'
+      document.body.appendChild(a); a.click(); a.remove()
+      setTimeout(() => URL.revokeObjectURL(a.href), 10000)
+      $('download-status').textContent = 'ダウンロードしました'
+    } catch (e) {
+      $('download-status').textContent = 'ダウンロードに失敗しました。ページを読み込み直して、もう一度押してください'
+    } finally {
+      btn.disabled = false
+    }
+  })
+
+  update()
+</script>
+</body>
+</html>

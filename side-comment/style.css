@@ -1,0 +1,164 @@
+/* side-comment：画面の端に縦長に置くコメント表示。値はscript.jsがURLパラメータから上書きする */
+@font-face {
+  font-family: "Side Comment UDEV";
+  src: url("./fonts/UDEVGothic-Bold.ttf") format("truetype");
+  font-weight: 700;
+  font-display: block;
+}
+
+:root {
+  --font: 24px;
+  --avatar: 32px;
+  --line: 1.2;
+  --cols: 8;
+  --lines: 5;
+  --bg-alpha: .65;
+  --accent: #ffffff;
+  --comment-font: "Side Comment UDEV", "BIZ UDGothic", "BIZ UDゴシック", monospace;
+  --text: #ffffff;
+  --dx: 1;
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --ease-in: cubic-bezier(.4, 0, 1, 1);
+  --t-step: 140ms;
+  --t-slide: 240ms;
+  --t-out: 180ms;
+  --stagger: 60ms;
+}
+:root.side-left { --dx: -1; }
+
+html, body {
+  margin: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  background: transparent;
+  font-family: "Noto Sans JP", "Yu Gothic UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+[hidden] { display: none; }
+
+/* URLでなくファイルとして開かれたときの案内。配信画面で気づけるよう目立たせる */
+.setup-error {
+  margin: 8px;
+  padding: 10px 12px;
+  background: rgba(120, 20, 20, .9);
+  border-left: 4px solid #ff5a5a;
+  color: #fff;
+  font: 700 14px/1.6 "Yu Gothic UI", sans-serif;
+  word-break: break-all;
+}
+
+.container {
+  position: relative;
+  height: 100%;
+  /* あふれた古いコメントは上の端で薄くして消す */
+  -webkit-mask: linear-gradient(to bottom, transparent 0, #000 32px);
+  mask: linear-gradient(to bottom, transparent 0, #000 32px);
+}
+.comments {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: flex-end;
+  gap: 8px;
+  height: 100%;
+  box-sizing: border-box;
+}
+.side-left .comments { align-items: flex-start; }
+
+.comment {
+  position: relative;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: flex-start;
+  gap: 5px;
+  box-sizing: border-box;
+  width: fit-content;
+  max-width: 100%;
+  padding: 6px 9px 6px 4px;
+  background: rgba(16, 17, 20, var(--bg-alpha));
+  border-right: 3px solid var(--accent);
+}
+.side-left .comment {
+  padding: 6px 9px 6px 6px;
+  border-right: 0;
+  border-left: 3px solid var(--accent);
+}
+.avatar {
+  flex: 0 0 var(--avatar);
+  width: var(--avatar);
+  height: var(--avatar);
+  /* 1行目の文字の高さの真ん中に合わせる */
+  margin-top: calc((var(--font) * var(--line) - var(--avatar)) / 2);
+  border-radius: 50%;
+  overflow: hidden;
+  background: rgba(255, 255, 255, .12);
+}
+.avatar img { display: block; width: 100%; height: 100%; }
+/* 名前ありのときは、名前の行とコメントの1行目をまとめた高さの真ん中に合わせる */
+.has-name .avatar {
+  margin-top: calc((var(--name-font) * var(--line) + var(--font) * var(--line) - var(--avatar)) / 2);
+}
+
+.comment-body { min-width: 0; flex: 1 1 auto; }
+/* 名前はコメントと同じ幅までで1行。はみ出す分は省略する。色はラインと同じ */
+.comment-name {
+  max-width: calc(var(--cols) * var(--font));
+  font-family: var(--comment-font);
+  font-size: var(--name-font);
+  font-weight: 700;
+  line-height: var(--line);
+  color: var(--accent);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, .95);
+}
+.comment-text {
+  color: var(--text);
+  font-family: var(--comment-font);
+  font-size: var(--font);
+  font-weight: 700;
+  line-height: var(--line);
+  /* 等幅フォントなら、幅をちょうどcols文字分にして禁則なしで折り返すと右端がそろう（半角2文字＝全角1文字） */
+  max-width: calc(var(--cols) * 1em);
+  line-break: anywhere;
+  word-break: break-all;
+  text-shadow: 0 1px 3px rgba(0, 0, 0, .95), 0 0 2px rgba(0, 0, 0, .9);
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: var(--lines);
+  overflow: hidden;
+}
+.comment-text img { height: 1.3em; width: auto; vertical-align: -.25em; }
+.comment-text .gift-image { height: 1.6em; }
+
+/* 出る：枠が外側から開く → アイコンが白く光って入る → 文字がスライド */
+@keyframes open-from-right {
+  from { clip-path: inset(0 0 0 100%); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes open-from-left {
+  from { clip-path: inset(0 100% 0 0); }
+  to { clip-path: inset(0 0 0 0); }
+}
+@keyframes flash-in {
+  0% { opacity: 0; transform: translateX(calc(12px * var(--dx))); filter: brightness(3); }
+  50% { opacity: 1; }
+  100% { opacity: 1; transform: translateX(0); filter: brightness(1); }
+}
+@keyframes slide-in {
+  from { opacity: 0; transform: translateX(calc(16px * var(--dx))); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes slide-out {
+  from { opacity: 1; transform: translateX(0); }
+  to { opacity: 0; transform: translateX(calc(14px * var(--dx))); }
+}
+.comment-enter-active { animation: open-from-right var(--t-slide) var(--ease-out) both; }
+.side-left .comment-enter-active { animation-name: open-from-left; }
+.comment-enter-active .avatar { animation: flash-in var(--t-slide) var(--ease-out) var(--t-step) both; }
+.comment-enter-active .comment-body { animation: slide-in var(--t-slide) var(--ease-out) calc(var(--t-step) + var(--stagger)) both; }
+.comment-leave-active { position: absolute; right: 0; animation: slide-out var(--t-out) var(--ease-in) both; }
+.side-left .comment-leave-active { right: auto; left: 0; }
+.comment-move { transition: transform var(--t-slide) var(--ease-out); }
