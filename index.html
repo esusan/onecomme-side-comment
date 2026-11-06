@@ -332,7 +332,10 @@
     timer = setTimeout(() => {
       const frame = $('preview')
       frame.style.width = w + 'px'
-      frame.src = 'side-comment/index.html?demo=1' + (q ? '&' + q : '')
+      // プレビューは全部の設定を付けて開く（テンプレート側の既定値やキャッシュに左右されないように）
+      const all = new URLSearchParams()
+      for (const k of Object.keys(DEFAULTS)) all.set(k, s[k])
+      frame.src = 'side-comment/index.html?demo=1&' + all.toString()
     }, 250)
   }
 
