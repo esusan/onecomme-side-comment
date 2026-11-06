@@ -187,7 +187,15 @@
           <label><input type="radio" name="name" value="1" checked><span>コメントの上に出す</span></label>
           <label><input type="radio" name="name" value="0"><span>出さない</span></label>
         </div>
-        <p class="hint">長い名前は1行に収まるところで省略します。色はラインと同じです。わんコメであだ名を付けた人はあだ名で表示されます。</p>
+        <p class="hint">長い名前は1行に収まるところで省略します。わんコメであだ名を付けた人はあだ名で表示されます。</p>
+      </div>
+      <div class="field" id="namecolor-field">
+        <div class="label">名前の色</div>
+        <div class="choices">
+          <label><input type="radio" name="namecolor" value="white" checked><span>白</span></label>
+          <label><input type="radio" name="namecolor" value="accent"><span>ラインと同じ</span></label>
+        </div>
+        <p class="hint">名前は文字が小さいので、雪原など明るい画面では色付きだと読みにくくなります。白ならラインがどの色でも読めます。</p>
       </div>
       <div class="field" id="namescale-field">
         <label for="namescale">名前の大きさ <span class="value" id="namescale-v"></span></label>
@@ -263,7 +271,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-  const DEFAULTS = { size: 24, cols: 8, lines: 5, side: 'right', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '1', namescale: 60, life: 0, max: 12 }
+  const DEFAULTS = { size: 24, cols: 8, lines: 5, side: 'right', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '1', namecolor: 'white', namescale: 60, life: 0, max: 12 }
   const $ = (id) => document.getElementById(id)
   const radio = (name) => document.querySelector(`input[name="${name}"]:checked`).value
 
@@ -278,7 +286,8 @@
       bg: Number($('bg').value),
       icon: radio('icon'),
       name: radio('name'),
-      // 名前を出さないときは大きさをURLに入れない
+      // 名前を出さないときは大きさと色をURLに入れない
+      namecolor: radio('name') === '1' ? radio('namecolor') : DEFAULTS.namecolor,
       namescale: radio('name') === '1' ? Number($('namescale').value) : DEFAULTS.namescale,
       life: Number($('life').value),
       max: Number($('max').value),
@@ -310,6 +319,7 @@
     document.querySelectorAll('.swatch').forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.hex === s.accent)))
     $('bg-v').textContent = s.bg + '%'
     $('namescale-field').hidden = s.name !== '1'
+    $('namecolor-field').hidden = s.name !== '1'
     $('namescale-v').textContent = $('namescale').value + '%'
     $('life-v').textContent = s.life === 0 ? '消さない' : s.life + '秒'
     $('max-v').textContent = s.max + '件'

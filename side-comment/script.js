@@ -10,6 +10,7 @@
 //   icon=1       0でアイコンを出さない
 //   name=1       コメントの上に名前を1行出す（長い名前は省略）。0で出さない
 //   namescale=60 名前の大きさ（コメントの文字に対する%）
+//   namecolor=white 名前の色。white（白） / accent（ラインと同じ色。明るい画面では読みにくい色がある）
 //   life=0       コメントを消すまでの秒数（0は消さない）
 //   max=12       同時に出す件数
 //   demo=1       ダミーコメントで確認（all で全部一度に出す）
@@ -38,6 +39,7 @@ const FONT = pick('font', 'udev', ['udev', 'bizud', 'sans'])
 const SHOW_ICON = params.get('icon') !== '0'
 const SHOW_NAME = params.get('name') !== '0'
 const NAME_SCALE = num('namescale', 60, 30, 100)
+const NAME_COLOR = pick('namecolor', 'white', ['white', 'accent'])
 const LIFE_SEC = num('life', 0, 0, 3600)
 const LIFE_MS = LIFE_SEC > 0 ? LIFE_SEC * 1000 : Infinity
 const MAX = Math.round(num('max', 12, 1, 50))
@@ -57,6 +59,7 @@ root.style.setProperty('--bg-alpha', BG / 100)
 root.style.setProperty('--accent', ACCENT)
 root.style.setProperty('--comment-font', FONTS[FONT])
 root.style.setProperty('--name-font', Math.round(SIZE * NAME_SCALE / 100) + 'px')
+root.style.setProperty('--name-color', NAME_COLOR === 'accent' ? ACCENT : '#ffffff')
 root.classList.add('side-' + SIDE)
 if (SHOW_NAME) root.classList.add('has-name')
 

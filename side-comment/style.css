@@ -101,14 +101,15 @@ html, body {
 }
 
 .comment-body { min-width: 0; flex: 1 1 auto; }
-/* 名前はコメントと同じ幅までで1行。はみ出す分は省略する。色はラインと同じ */
+/* 名前はコメントと同じ幅までで1行。はみ出す分は省略する。
+   色は既定で白（雪原など明るい画面だと、色付きの小さい文字はパネルの灰色に埋もれる） */
 .comment-name {
   max-width: calc(var(--cols) * var(--font));
   font-family: var(--comment-font);
   font-size: var(--name-font);
   font-weight: 700;
   line-height: var(--line);
-  color: var(--accent);
+  color: var(--name-color, #ffffff);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
