@@ -8,7 +8,7 @@
 //   side=right   寄せる側（right / left）
 //   font=udev    udev（同梱のUDEV Gothic・等幅） / bizud（BIZ UDゴシック・等幅） / sans（游ゴシックなど・等幅でない）
 //   icon=1       0でアイコンを出さない
-//   name=0       1でコメントの上に名前を1行出す（長い名前は省略）
+//   name=1       コメントの上に名前を1行出す（長い名前は省略）。0で出さない
 //   namescale=60 名前の大きさ（コメントの文字に対する%）
 //   life=0       コメントを消すまでの秒数（0は消さない）
 //   max=12       同時に出す件数
@@ -36,7 +36,7 @@ const ACCENT = /^([0-9a-f]{3}|[0-9a-f]{6})$/i.test(accentParam) ? '#' + accentPa
 const SIDE = pick('side', 'right', ['right', 'left'])
 const FONT = pick('font', 'udev', ['udev', 'bizud', 'sans'])
 const SHOW_ICON = params.get('icon') !== '0'
-const SHOW_NAME = params.get('name') === '1'
+const SHOW_NAME = params.get('name') !== '0'
 const NAME_SCALE = num('namescale', 60, 30, 100)
 const LIFE_SEC = num('life', 0, 0, 3600)
 const LIFE_MS = LIFE_SEC > 0 ? LIFE_SEC * 1000 : Infinity

@@ -183,12 +183,12 @@
       <div class="field">
         <div class="label">名前</div>
         <div class="choices">
-          <label><input type="radio" name="name" value="0" checked><span>出さない</span></label>
-          <label><input type="radio" name="name" value="1"><span>コメントの上に出す</span></label>
+          <label><input type="radio" name="name" value="1" checked><span>コメントの上に出す</span></label>
+          <label><input type="radio" name="name" value="0"><span>出さない</span></label>
         </div>
         <p class="hint">長い名前は1行に収まるところで省略します。色はラインと同じです。わんコメであだ名を付けた人はあだ名で表示されます。</p>
       </div>
-      <div class="field" id="namescale-field" hidden>
+      <div class="field" id="namescale-field">
         <label for="namescale">名前の大きさ <span class="value" id="namescale-v"></span></label>
         <input type="range" id="namescale" min="40" max="100" step="5" value="60">
         <p class="hint">コメントの文字に対しての大きさです。</p>
@@ -262,7 +262,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-  const DEFAULTS = { size: 24, cols: 8, lines: 5, side: 'right', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '0', namescale: 60, life: 0, max: 12 }
+  const DEFAULTS = { size: 24, cols: 8, lines: 5, side: 'right', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '1', namescale: 60, life: 0, max: 12 }
   const $ = (id) => document.getElementById(id)
   const radio = (name) => document.querySelector(`input[name="${name}"]:checked`).value
 
