@@ -25,9 +25,9 @@
 | 名前 | 既定 | 内容 |
 | --- | --- | --- |
 | size | 24 | 文字の大きさ(px) |
-| cols | 8 | 1行の文字数（全角） |
-| lines | 5 | 最大の行数。超えた分は省略します |
-| side | right | 寄せる側（right / left） |
+| cols | 15 | 1行の文字数（全角） |
+| lines | 3 | 最大の行数。超えた分は省略します |
+| side | left | 寄せる側（left / right） |
 | font | udev | udev / bizud / sans |
 | accent | ffffff | ラインの色（#なしの16進） |
 | bg | 65 | 背景の黒の濃さ(0〜100) |

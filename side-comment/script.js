@@ -1,11 +1,11 @@
 // side-comment：画面の端に縦長に置く、アイコンとコメントだけのコメント表示（わんコメ用テンプレート）
 // 見た目は config.js（設定ページでダウンロードすると入る）で変える。URLパラメータを付けて開いたときはそちらを優先する。どちらもなければ既定値
 //   size=24      文字の大きさ(px)
-//   cols=8       1行の文字数（全角。半角は2文字で全角1文字分）
-//   lines=5      これより長いコメントは省略
+//   cols=15      1行の文字数（全角。半角は2文字で全角1文字分）
+//   lines=3      これより長いコメントは省略
 //   accent=ffffff ラインの色（#なしの16進）
 //   bg=65        背景の黒の濃さ(0〜100)
-//   side=right   寄せる側（right / left）
+//   side=left    寄せる側（left / right）
 //   font=udev    udev（同梱のUDEV Gothic・等幅） / bizud（BIZ UDゴシック・等幅） / sans（游ゴシックなど・等幅でない）
 //   icon=1       0でアイコンを出さない
 //   name=1       コメントの上に名前を1行出す（長い名前は省略）。0で出さない
@@ -29,12 +29,12 @@ function pick(name, def, choices) {
 }
 
 const SIZE = num('size', 24, 10, 80)
-const COLS = num('cols', 8, 3, 40)
-const LINES = Math.round(num('lines', 5, 1, 20))
+const COLS = num('cols', 15, 3, 40)
+const LINES = Math.round(num('lines', 3, 1, 20))
 const BG = num('bg', 65, 0, 100)
 const accentParam = params.get('accent') || ''
 const ACCENT = /^([0-9a-f]{3}|[0-9a-f]{6})$/i.test(accentParam) ? '#' + accentParam : '#ffffff'
-const SIDE = pick('side', 'right', ['right', 'left'])
+const SIDE = pick('side', 'left', ['left', 'right'])
 const FONT = pick('font', 'udev', ['udev', 'bizud', 'sans'])
 const SHOW_ICON = params.get('icon') !== '0'
 const SHOW_NAME = params.get('name') !== '0'
@@ -87,7 +87,7 @@ function demoComments() {
     ['#a87a8c', 'nightwalker_2026', 'ナイス！'],
     ['#7aa88c', '回避の練習中の人', '今の回避すごい'],
     ['#a89a7a', 'Tomo', 'Good game! 88888'],
-    ['#7aa8a8', 'みかん', 'おつかれさまです'],
+    ['#7aa8a8', 'しろくま', 'おつかれさまです'],
   ]
   return rows.map(([color, name, text], i) => ({
     data: { id: 'demo' + i, timestamp: new Date().toISOString(), profileImage: icon(color), name, displayName: name, comment: text },

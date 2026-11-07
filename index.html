@@ -6,6 +6,12 @@
 <title>side-comment 設定</title>
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <meta name="description" content="わんコメ用コメントテンプレート side-comment の見た目を決めて、OBSに貼るURLを作るページ">
+<!-- リンクカード用 -->
+<meta property="og:type" content="website">
+<meta property="og:title" content="side-comment｜わんコメ用コメントテンプレート">
+<meta property="og:description" content="画面の端に縦長に置く、アイコン・名前・コメントのコメント表示。見た目を選んでOBSに貼るURLを作れます。">
+<meta property="og:url" content="https://esusan.github.io/onecomme-side-comment/">
+<meta name="twitter:card" content="summary">
 <style>
   :root {
     --bg: #14161a;
@@ -112,6 +118,7 @@
     font-weight: 700;
     font-variant-numeric: tabular-nums;
   }
+  .rec-h { color: var(--accent); font-weight: 700; }
   .rec-w.changed { animation: rec-flash 900ms ease-out; }
   @keyframes rec-flash {
     0% { background: rgba(62, 232, 240, .55); color: #071214; }
@@ -122,7 +129,37 @@
   li { margin-bottom: 4px; }
   dt { font-weight: 700; margin-top: 12px; }
   dd { margin: 4px 0 0; color: var(--muted); }
-  footer { margin-top: 48px; color: var(--muted); font-size: 13px; }
+  footer { margin-top: 48px; padding-top: 16px; border-top: 1px solid var(--line); color: var(--muted); font-size: 12.5px; line-height: 1.8; }
+  footer p { margin: 12px 0 0; }
+  .foot-links { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; min-height: 36px; }
+  .foot-label { width: 8em; text-align: center; padding: 2px 8px; font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: 4px; }
+  .foot-name { color: var(--text); font-size: 13.5px; }
+  .social {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    color: var(--muted);
+    border: 1px solid var(--line);
+    transition: color .2s, border-color .2s;
+  }
+  .social:hover { color: var(--accent); border-color: var(--accent); }
+  .muted-note { color: var(--muted); font-size: 13px; }
+  .credit { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+  .credit input {
+    flex: 1 1 280px;
+    min-width: 0;
+    background: #0f1114;
+    color: var(--text);
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    padding: 8px 10px;
+    font: inherit;
+    font-size: 14px;
+  }
 </style>
 </head>
 <body>
@@ -139,20 +176,20 @@
       </div>
       <div class="field">
         <label for="cols">1行の文字数 <span class="value" id="cols-v"></span></label>
-        <input type="range" id="cols" min="4" max="20" step="1" value="8">
+        <input type="range" id="cols" min="4" max="25" step="1" value="15">
         <p class="hint">全角での数です。半角の英数字は2文字で全角1文字分になります。</p>
         <p class="width-callout">文字の大きさ・1行の文字数・アイコンを変えると、OBSのブラウザソースの幅も合わせて変える必要があります。今の設定に合う幅は <span class="rec-w"></span> です。</p>
       </div>
       <div class="field">
         <label for="lines">最大の行数 <span class="value" id="lines-v"></span></label>
-        <input type="range" id="lines" min="1" max="10" step="1" value="5">
+        <input type="range" id="lines" min="1" max="10" step="1" value="3">
         <p class="hint">これより長いコメントは「…」で省略します。</p>
       </div>
       <div class="field">
         <div class="label">寄せる側</div>
         <div class="choices">
-          <label><input type="radio" name="side" value="right" checked><span>右端</span></label>
-          <label><input type="radio" name="side" value="left"><span>左端</span></label>
+          <label><input type="radio" name="side" value="left" checked><span>左端</span></label>
+          <label><input type="radio" name="side" value="right"><span>右端</span></label>
         </div>
       </div>
       <div class="field">
@@ -243,7 +280,12 @@
       </div>
       <p class="hint">わんコメのポートを11180から変えている場合は、URLの数字をご自分のものに書き換えてください。</p>
     </li>
-    <li>同じ画面で、ブラウザソースの幅を <span class="rec-w"></span> にします。高さはお好みの長さで大丈夫です（コメントは下から積み上がり、入りきらない分は上に消えます）。画面の端に寄せて置きます。</li>
+    <li>同じ画面で、ブラウザソースの幅を <span class="rec-w"></span> にします。</li>
+    <li>
+      <p>続けて、ブラウザソースの高さを決めます。このテンプレートには高さの設定がなく、ブラウザソースの高さがそのままコメントを表示する範囲になります。</p>
+      <p class="hint">コメントは下から上へ積み上がり、入りきらない古いコメントは上の端で消えます。高くするほど、たくさんのコメントが残ります。目安として、高さ700pxなら1行のコメントがおよそ <span class="rec-h"></span> 入ります。</p>
+    </li>
+    <li>ブラウザソースを画面の端に寄せて置きます。新しいコメントはソースの下端に出るので、下端をコメントを出したい位置に合わせてください。</li>
   </ol>
   <p>見た目を変えたくなったら、上で選び直して4のURLを貼り直します。文字の大きさ・1行の文字数・アイコンを変えたときは、5の幅も変えてください。わんコメのテンプレート画面からOBSへドラッグしても動きますが、その場合はURLの設定が付かず、ダウンロードしたときの設定で表示されます。</p>
 
@@ -263,15 +305,29 @@
     <dd>本文のないもの（金額だけのスパチャなど）は表示しません。本文があれば表示されます。</dd>
   </dl>
 
+  <h2>ご利用について</h2>
+  <p>配信や動画で使うときに許可は不要です。ご自由にお使いください。</p>
+  <p class="muted-note">必須ではありませんが、概要欄などでこのページを紹介してもらえると嬉しいです。</p>
+  <div class="output credit">
+    <input type="text" id="credit" readonly value="わんコメ用コメントテンプレート side-comment https://esusan.github.io/onecomme-side-comment/">
+    <button type="button" id="credit-copy">コピー</button><span class="copied" id="credit-copied" hidden>コピーしました</span>
+  </div>
+
   <footer>
-    作った人：えすさん ／ ソース：<a href="https://github.com/esusan/onecomme-side-comment">GitHub</a><br>
-    コードはMITライセンスです。同梱フォント UDEV Gothic（© Yuko OTAWARA）は SIL Open Font License 1.1 です。
+    <div class="foot-links">
+      <span class="foot-label">作成者</span>
+      <span class="foot-name">えすさん</span>
+      <a class="social" href="https://x.com/u_se_nr" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
+      <a class="social" href="https://www.youtube.com/@%E3%81%88%E3%81%99%E3%81%95%E3%82%93-0" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.13-2.14C19.51 3.5 12 3.5 12 3.5s-7.510 0-9.37.56A3.02 3.02 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.13 2.14C4.49 20.5 12 20.5 12 20.5s7.51 0 9.37-.56a3.02 3.02 0 0 0 2.13-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.4 3.6z"/></svg></a>
+    </div>
+    <p>※このテンプレートは個人が作った非公式のものです。わんコメ（OneComme）の開発元とは関係ありません。</p>
+    <p>コードはMITライセンスです。同梱フォント UDEV Gothic（© Yuko OTAWARA）は SIL Open Font License 1.1 です。</p>
   </footer>
 </main>
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-  const DEFAULTS = { size: 24, cols: 8, lines: 5, side: 'right', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '1', namecolor: 'white', namescale: 60, life: 0, max: 12 }
+  const DEFAULTS = { size: 24, cols: 15, lines: 3, side: 'left', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '1', namecolor: 'white', namescale: 60, life: 0, max: 12 }
   const $ = (id) => document.getElementById(id)
   const radio = (name) => document.querySelector(`input[name="${name}"]:checked`).value
 
@@ -308,6 +364,13 @@
     return Math.ceil((3 + pad + avatar + s.cols * s.size + 2) / 10) * 10
   }
 
+  // 1行のコメント1件の高さ（テンプレートのCSSと同じ計算：上下の余白12 + 名前の行 + 本文1行、アイコンの方が高ければアイコン）＋間隔8
+  function oneLineHeight(s) {
+    const text = s.size * 1.2 + (s.name === '1' ? Math.round(s.size * s.namescale / 100) * 1.2 : 0)
+    const avatar = s.icon === '1' ? Math.round(s.size * 4 / 3) : 0
+    return Math.max(text, avatar) + 12 + 8
+  }
+
   let timer
   let lastWidth = null
   function update() {
@@ -338,6 +401,8 @@
       if (changed) { el.classList.remove('changed'); void el.offsetWidth; el.classList.add('changed') }
     })
     $('stage').classList.toggle('left', s.side === 'left')
+    const fit = Math.min(s.max, Math.floor((700 + 8) / oneLineHeight(s)))
+    document.querySelectorAll('.rec-h').forEach((el) => { el.textContent = fit + '件' })
 
     clearTimeout(timer)
     timer = setTimeout(() => {
@@ -356,7 +421,7 @@
   )
   // ラインの色の候補。押すとその色になる
   const SWATCHES = [
-    ['白', 'ffffff'], ['シアン', '3ee8f0'], ['ピンク', 'ff6fa8'], ['オレンジ', 'ff9a3d'],
+    ['白', 'ffffff'], ['青', '5b8cff'], ['ピンク', 'ff6fa8'], ['オレンジ', 'ff9a3d'],
     ['黄', 'ffd84a'], ['緑', '5ee07a'], ['紫', 'a98bff'], ['赤', 'ff5a5a'],
   ]
   for (const [label, hex] of SWATCHES) {
@@ -370,6 +435,15 @@
     b.addEventListener('click', () => { $('accent').value = '#' + hex; update() })
     $('swatches').appendChild(b)
   }
+  $('credit-copy').addEventListener('click', async () => {
+    try {
+      await navigator.clipboard.writeText($('credit').value)
+    } catch {
+      $('credit').select(); document.execCommand('copy')
+    }
+    $('credit-copied').hidden = false
+    setTimeout(() => { $('credit-copied').hidden = true }, 1500)
+  })
   $('copy').addEventListener('click', async () => {
     try {
       await navigator.clipboard.writeText($('url').textContent)
