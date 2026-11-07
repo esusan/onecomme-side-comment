@@ -4,6 +4,8 @@
   src: url("./fonts/UDEVGothic-Bold.ttf") format("truetype");
   font-weight: 700;
   font-display: block;
+  /* UDEV Gothicは全角スペース(U+3000)を点線の四角で描くので、その1文字だけ後ろのフォントに任せる */
+  unicode-range: U+0000-2FFF, U+3001-10FFFF;
 }
 
 :root {
