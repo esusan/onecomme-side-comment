@@ -136,6 +136,8 @@
   .foot-name { color: var(--text); font-size: 13.5px; }
   a.foot-name { text-decoration: underline; text-decoration-color: var(--line); text-underline-offset: 3px; }
   a.foot-name:hover { color: var(--accent); text-decoration-color: var(--accent); }
+  /* 他に作ったツールへのリンク。作成者の行の下に並べる */
+  .foot-more { margin-top: 6px; column-gap: 16px; }
   /* えすさんのページ（https://esusan.github.io/）へのリンク。「えす」のアイコンを丸く出す */
   .social.home { overflow: hidden; }
   .social.home img { display: block; width: 100%; height: 100%; object-fit: cover; }
@@ -325,6 +327,11 @@
       <a class="social home" href="https://esusan.github.io/" title="えすさんのページ" aria-label="えすさんのページ"><img src="https://esusan.github.io/img/favicon.png" alt="" width="30" height="30"></a>
       <a class="social" href="https://x.com/u_se_nr" target="_blank" rel="noopener noreferrer" title="X" aria-label="X"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
       <a class="social" href="https://www.youtube.com/@%E3%81%88%E3%81%99%E3%81%95%E3%82%93-0" target="_blank" rel="noopener noreferrer" title="YouTube" aria-label="YouTube"><svg viewBox="0 0 24 24" width="16" height="16" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3.02 3.02 0 0 0-2.13-2.14C19.51 3.5 12 3.5 12 3.5s-7.510 0-9.37.56A3.02 3.02 0 0 0 .5 6.2 31.6 31.6 0 0 0 0 12a31.6 31.6 0 0 0 .5 5.8 3.02 3.02 0 0 0 2.13 2.14C4.49 20.5 12 20.5 12 20.5s7.51 0 9.37-.56a3.02 3.02 0 0 0 2.13-2.14A31.6 31.6 0 0 0 24 12a31.6 31.6 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.4 3.6z"/></svg></a>
+    </div>
+    <div class="foot-links foot-more">
+      <span class="foot-label">他のツール</span>
+      <a class="foot-name" href="https://esusan.github.io/nightreign-picker/">キャラランダムツール</a>
+      <a class="foot-name" href="https://esusan.github.io/nightreign-dict/">ナイトレイン読み上げ辞書</a>
     </div>
     <p>※このテンプレートは個人が作った非公式のものです。わんコメ（OneComme）の開発元とは関係ありません。</p>
     <p>コードはMITライセンスです。同梱フォント UDEV Gothic（© Yuko OTAWARA）は SIL Open Font License 1.1 です。</p>
