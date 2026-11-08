@@ -32,7 +32,7 @@
   }
   main { max-width: 1080px; margin: 0 auto; padding: 24px 16px 64px; }
   h1 { font-size: 22px; margin: 0 0 4px; }
-  h2 { font-size: 17px; margin: 40px 0 12px; padding-bottom: 6px; border-bottom: 1px solid var(--line); }
+  h2 { font-size: 20px; line-height: 1.4; margin: 56px 0 16px; padding: 4px 0 8px 12px; border-left: 4px solid var(--accent); border-bottom: 1px solid var(--line); }
   p { margin: 0 0 12px; }
   .lead { color: var(--muted); margin-bottom: 24px; }
   a { color: var(--accent); }
@@ -93,6 +93,7 @@
   .steps > li > p { margin: 0 0 8px; }
   .steps .output { margin-bottom: 6px; }
   .steps .hint { color: var(--muted); font-size: 13px; margin: 0; }
+  .steps .shot { display: block; max-width: min(100%, 560px); height: auto; border: 1px solid var(--line); border-radius: 6px; }
   .swatches { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 10px; }
   .swatch {
     width: 32px;
@@ -277,8 +278,14 @@
         <span class="copied" id="download-status"></span>
       </div>
     </li>
-    <li>中の <code>side-comment</code> フォルダを <code>%APPDATA%\onecomme\templates\custom\</code> に入れます（エクスプローラーのアドレス欄にこのパスを貼ると開けます）。</li>
-    <li>わんコメのテンプレート画面を開きます。side-comment が出ていなければ、わんコメを起動し直してください。</li>
+    <li>
+      <p>中の <code>side-comment</code> フォルダを <code>%APPDATA%\onecomme\templates\custom\</code> に入れます（エクスプローラーのアドレス欄にこのパスを貼ると開けます）。</p>
+      <img class="shot" src="img/install-folder.png" alt="customフォルダの中にside-commentフォルダが入っている状態" width="976" height="346">
+    </li>
+    <li>
+      <p>わんコメのテンプレート画面に side-comment が出ていればOKです（わんコメが認識できているかの確認だけです）。出ていなければ、わんコメを起動し直してください。</p>
+      <img class="shot" src="img/template-list.jpg" alt="わんコメのメニューのテンプレートを開き、一覧にside-commentが表示されている状態" width="1921" height="1291">
+    </li>
     <li>
       <p>OBSにブラウザソースを追加し、「ローカルファイル」のチェックを外したまま、URLにこれを貼ります。上で選んだ見た目が入っています。</p>
       <div class="output">
@@ -287,7 +294,10 @@
       </div>
       <p class="hint">わんコメのポートを11180から変えている場合は、URLの数字をご自分のものに書き換えてください。</p>
     </li>
-    <li>同じ画面で、ブラウザソースの幅を <span class="rec-w"></span> にします。</li>
+    <li>
+      <p>同じ画面で、ブラウザソースの幅を <span class="rec-w"></span> にします。</p>
+      <p class="hint">この幅は、上で選んだ文字の大きさ・1行の文字数・アイコンの有無から計算しています。設定を変えると幅も変わるので、そのときはここの数字に合わせ直してください。</p>
+    </li>
     <li>
       <p>続けて、ブラウザソースの高さを決めます。このテンプレートには高さの設定がなく、ブラウザソースの高さがそのままコメントを表示する範囲になります。</p>
       <p class="hint">コメントは下から上へ積み上がり、入りきらない古いコメントは上の端で消えます。高くするほど、たくさんのコメントが残ります。目安として、高さ700pxなら1行のコメントがおよそ <span class="rec-h"></span> 入ります。</p>
@@ -468,7 +478,7 @@
     setTimeout(() => { $('copied').hidden = true }, 1500)
   })
   // 選んだ設定を config.js に書いて、テンプレートのファイルと一緒にzipにする
-  const TEMPLATE_FILES = ['index.html', 'script.js', 'style.css', 'template.json', 'fonts/UDEVGothic-Bold.ttf', 'fonts/LICENSE_UDEVGothic.txt']
+  const TEMPLATE_FILES = ['index.html', 'script.js', 'style.css', 'template.json', 'thumb.png', 'fonts/UDEVGothic-Bold.ttf', 'fonts/LICENSE_UDEVGothic.txt']
   function configJs(s) {
     const cfg = {}
     for (const k of Object.keys(DEFAULTS)) if (String(s[k]) !== String(DEFAULTS[k])) cfg[k] = s[k]
