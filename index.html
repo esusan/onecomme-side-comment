@@ -168,6 +168,12 @@
     font: inherit;
     font-size: 14px;
   }
+  .import { margin-bottom: 20px; }
+  .import-label { display: block; font-weight: 600; margin-bottom: 2px; }
+  .import .hint { color: var(--muted); font-size: 13px; margin: 0 0 8px; }
+  .import-status { font-size: 13px; margin: 8px 0 0; color: var(--accent); }
+  .import-status:empty { display: none; }
+  .import-status.error { color: #ff8a8a; }
 </style>
 </head>
 <body>
@@ -176,6 +182,15 @@
   <p class="lead">わんコメ用のコメント表示テンプレートです。画面の端に縦長に置いて、アイコンとコメントを表示します。ここで見た目を決めると、OBSに貼るURLができます。</p>
 
   <h2>見た目を決める</h2>
+  <div class="output import">
+    <label for="import-url" class="import-label">OBSに貼ってあるURLから続ける</label>
+    <p class="hint">OBSのブラウザソースに貼ってあるURLをここに貼ると、そのときの設定が下に読み込まれます。初めての方は空のままで大丈夫です。</p>
+    <div class="credit">
+      <input type="text" id="import-url" placeholder="http://localhost:11180/templates/custom/side-comment/?…" spellcheck="false" autocomplete="off">
+      <button type="button" id="import">読み込む</button>
+    </div>
+    <p class="import-status" id="import-status" role="status"></p>
+  </div>
   <div class="layout">
     <form class="form" id="form" onsubmit="return false">
       <div class="field">
@@ -305,7 +320,7 @@
     <li>ブラウザソースを画面の端に寄せて置きます。新しいコメントはソースの下端に出るので、下端をコメントを出したい位置に合わせてください。</li>
     <li>配信の前に、わんコメのコメントテスター（右上の「…」メニュー →「コメントテスター」）でコメントを流して、OBSでの表示を確かめておくのがおすすめです。長いコメントや長い名前も試すと、幅や省略のされ方が分かります。</li>
   </ol>
-  <p>見た目を変えたくなったら、上で選び直して4のURLを貼り直します。文字の大きさ・1行の文字数・アイコンを変えたときは、5の幅も変えてください。わんコメのテンプレート画面からOBSへドラッグしても動きますが、その場合はURLの設定が付かず、ダウンロードしたときの設定で表示されます。</p>
+  <p>見た目を変えたくなったら、今OBSに貼ってあるURLを「OBSに貼ってあるURLから続ける」の欄に貼ると、前の設定から選び直せます。選び直したら4のURLを貼り直します。文字の大きさ・1行の文字数・アイコンを変えたときは、5の幅も変えてください。わんコメのテンプレート画面からOBSへドラッグしても動きますが、その場合はURLの設定が付かず、ダウンロードしたときの設定で表示されます。</p>
 
   <h2>コメントが出ないとき</h2>
   <dl>
@@ -516,7 +531,68 @@
     }
   })
 
-  update()
+  // OBSに貼ってあるURL（またはこのページに ?size=… を付けたURL）から設定をフォームに戻す
+  // テンプレートと同じ読み方をして、フォームの範囲外の値は端に丸めて知らせる
+  const LABELS = { size: '文字の大きさ', cols: '1行の文字数', lines: '最大の行数', side: '寄せる側', font: 'フォント', accent: 'ラインの色', bg: '背景の黒の濃さ', icon: 'アイコン', name: '名前', namecolor: '名前の色', namescale: '名前の大きさ', life: 'コメントを消すまで', max: '同時に出す件数' }
+  function applyParams(p) {
+    const notes = []
+    let count = 0
+    // 書かれていない項目は既定値に戻す（URLは既定値と違うものだけ入っているため）
+    for (const k of Object.keys(DEFAULTS)) {
+      const raw = p.has(k) ? p.get(k) : String(DEFAULTS[k])
+      if (p.has(k)) count++
+      const range = document.querySelector(`#form input[type=range]#${k}`)
+      if (range) {
+        const v = Number(raw)
+        if (raw === '' || Number.isNaN(v)) { range.value = DEFAULTS[k]; notes.push(`${LABELS[k]}が読めなかったので既定値にしました`); continue }
+        range.value = v
+        if (Number(range.value) !== v) notes.push(`${LABELS[k]}（${v}）はこのページで選べる範囲外なので${range.value}にしました`)
+        continue
+      }
+      if (k === 'accent') {
+        let hex = raw.replace(/^#/, '').toLowerCase()
+        if (/^[0-9a-f]{3}$/.test(hex)) hex = hex.replace(/./g, (c) => c + c)
+        if (!/^[0-9a-f]{6}$/.test(hex)) { hex = DEFAULTS.accent; notes.push('ラインの色が読めなかったので白にしました') }
+        $('accent').value = '#' + hex
+        continue
+      }
+      // ラジオ。アイコンと名前はテンプレートと同じく 0 以外は「出す」
+      const v = (k === 'icon' || k === 'name') ? (raw === '0' ? '0' : '1') : raw
+      const el = document.querySelector(`input[name="${k}"][value="${CSS.escape(v)}"]`)
+        || document.querySelector(`input[name="${k}"][value="${DEFAULTS[k]}"]`)
+      el.checked = true
+    }
+    update()
+    return { count, notes }
+  }
+
+  function importFrom(text) {
+    const status = $('import-status')
+    status.classList.remove('error')
+    let u
+    try { u = new URL(text.trim()) } catch {
+      status.classList.add('error')
+      status.textContent = 'URLとして読めませんでした。OBSのブラウザソースのURL欄をそのままコピーして貼ってください'
+      return
+    }
+    if (!/\/side-comment\/?(index\.html)?$/.test(u.pathname)) {
+      status.classList.add('error')
+      status.textContent = 'side-comment のURLではないようです。OBSのブラウザソースのURL欄をそのままコピーして貼ってください'
+      return
+    }
+    const { count, notes } = applyParams(u.searchParams)
+    const head = count ? `${count}項目の設定を読み込みました（書かれていない項目は既定値です）` : '設定の付いていないURLなので、既定値にしました'
+    status.textContent = [head, ...notes].join('。') + '。'
+  }
+  $('import').addEventListener('click', () => importFrom($('import-url').value))
+  $('import-url').addEventListener('keydown', (e) => { if (e.key === 'Enter') importFrom($('import-url').value) })
+  // 貼り付けたらすぐ読み込む
+  $('import-url').addEventListener('paste', () => setTimeout(() => importFrom($('import-url').value), 0))
+
+  // このページ自体に設定が付いていたら（?size=24&… ）それを読み込む
+  const own = new URLSearchParams(location.search)
+  if (Object.keys(DEFAULTS).some((k) => own.has(k))) applyParams(own)
+  else update()
 </script>
 <script>
   // アクセス数の集計（GoatCounter。えすさんの他のページと同じサイトに /onecomme-side-comment/ として送る）
