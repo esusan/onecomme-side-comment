@@ -583,6 +583,8 @@
     const { count, notes } = applyParams(u.searchParams)
     const head = count ? `${count}項目の設定を読み込みました（書かれていない項目は既定値です）` : '設定の付いていないURLなので、既定値にしました'
     status.textContent = [head, ...notes].join('。') + '。'
+    // 読み込めたら欄を空にする。古いURLが残っていると、下の新しいURLと間違えてコピーしやすいため
+    $('import-url').value = ''
   }
   $('import').addEventListener('click', () => importFrom($('import-url').value))
   $('import-url').addEventListener('keydown', (e) => { if (e.key === 'Enter') importFrom($('import-url').value) })
