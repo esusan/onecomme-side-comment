@@ -216,6 +216,13 @@
         </div>
       </div>
       <div class="field">
+        <div class="label">新しいコメントの位置</div>
+        <div class="choices">
+          <label><input type="radio" name="newest" value="bottom" checked><span>下に出す（上へ積む）</span></label>
+          <label><input type="radio" name="newest" value="top"><span>上に出す（下へ積む）</span></label>
+        </div>
+      </div>
+      <div class="field">
         <div class="label">フォント</div>
         <div class="choices">
           <label><input type="radio" name="font" value="udev" checked><span>UDEV Gothic（同梱）</span></label>
@@ -265,7 +272,7 @@
       <div class="field">
         <label for="life">コメントを消すまで <span class="value" id="life-v"></span></label>
         <input type="range" id="life" min="0" max="300" step="10" value="0">
-        <p class="hint">0は時間では消しません（新しいコメントに押し出されて上へ消えます）。</p>
+        <p class="hint">0は時間では消しません（新しいコメントに押し出されて<span class="dir-out">上</span>へ消えます）。</p>
       </div>
       <div class="field">
         <label for="max">同時に出す件数 <span class="value" id="max-v"></span></label>
@@ -315,9 +322,9 @@
     </li>
     <li>
       <p>続けて、ブラウザソースの高さを決めます。このテンプレートには高さの設定がなく、ブラウザソースの高さがそのままコメントを表示する範囲になります。</p>
-      <p class="hint">コメントは下から上へ積み上がり、入りきらない古いコメントは上の端で消えます。高くするほど、たくさんのコメントが残ります。目安として、高さ700pxなら1行のコメントがおよそ <span class="rec-h"></span> 入ります。</p>
+      <p class="hint">コメントは<span class="dir-in">下</span>から<span class="dir-out">上</span>へ積み重なり、入りきらない古いコメントは<span class="dir-out">上</span>の端で消えます。高くするほど、たくさんのコメントが残ります。目安として、高さ700pxなら1行のコメントがおよそ <span class="rec-h"></span> 入ります。</p>
     </li>
-    <li>ブラウザソースを画面の端に寄せて置きます。新しいコメントはソースの下端に出るので、下端をコメントを出したい位置に合わせてください。</li>
+    <li>ブラウザソースを画面の端に寄せて置きます。新しいコメントはソースの<span class="dir-in">下</span>端に出るので、<span class="dir-in">下</span>端をコメントを出したい位置に合わせてください。</li>
     <li>配信の前に、わんコメのコメントテスター（右上の「…」メニュー →「コメントテスター」）でコメントを流して、OBSでの表示を確かめておくのがおすすめです。長いコメントや長い名前も試すと、幅や省略のされ方が分かります。</li>
   </ol>
   <p>見た目を変えたくなったら、今OBSに貼ってあるURLを「OBSに貼ってあるURLから続ける」の欄に貼ると、前の設定から選び直せます。選び直したら4のURLを貼り直します。文字の大きさ・1行の文字数・アイコンを変えたときは、5の幅も変えてください。わんコメのテンプレート画面からOBSへドラッグしても動きますが、その場合はURLの設定が付かず、ダウンロードしたときの設定で表示されます。</p>
@@ -366,7 +373,7 @@
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
 <script>
-  const DEFAULTS = { size: 24, cols: 15, lines: 3, side: 'left', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '1', namecolor: 'white', namescale: 60, life: 0, max: 12 }
+  const DEFAULTS = { size: 24, cols: 15, lines: 3, side: 'left', newest: 'bottom', font: 'udev', accent: 'ffffff', bg: 65, icon: '1', name: '1', namecolor: 'white', namescale: 60, life: 0, max: 12 }
   const $ = (id) => document.getElementById(id)
   const radio = (name) => document.querySelector(`input[name="${name}"]:checked`).value
 
@@ -376,6 +383,7 @@
       cols: Number($('cols').value),
       lines: Number($('lines').value),
       side: radio('side'),
+      newest: radio('newest'),
       font: radio('font'),
       accent: $('accent').value.replace('#', '').toLowerCase(),
       bg: Number($('bg').value),
@@ -425,6 +433,10 @@
     $('namescale-v').textContent = $('namescale').value + '%'
     $('life-v').textContent = s.life === 0 ? '消さない' : s.life + '秒'
     $('max-v').textContent = s.max + '件'
+    // 使い方の説明の「上・下」を、新しいコメントの位置に合わせる
+    const top = s.newest === 'top'
+    document.querySelectorAll('.dir-in').forEach((el) => { el.textContent = top ? '上' : '下' })
+    document.querySelectorAll('.dir-out').forEach((el) => { el.textContent = top ? '下' : '上' })
 
     const q = query(s)
     const url = 'http://localhost:11180/templates/custom/side-comment/' + (q ? '?' + q : '')
@@ -533,7 +545,7 @@
 
   // OBSに貼ってあるURL（またはこのページに ?size=… を付けたURL）から設定をフォームに戻す
   // テンプレートと同じ読み方をして、フォームの範囲外の値は端に丸めて知らせる
-  const LABELS = { size: '文字の大きさ', cols: '1行の文字数', lines: '最大の行数', side: '寄せる側', font: 'フォント', accent: 'ラインの色', bg: '背景の黒の濃さ', icon: 'アイコン', name: '名前', namecolor: '名前の色', namescale: '名前の大きさ', life: 'コメントを消すまで', max: '同時に出す件数' }
+  const LABELS = { size: '文字の大きさ', cols: '1行の文字数', lines: '最大の行数', side: '寄せる側', newest: '新しいコメントの位置', font: 'フォント', accent: 'ラインの色', bg: '背景の黒の濃さ', icon: 'アイコン', name: '名前', namecolor: '名前の色', namescale: '名前の大きさ', life: 'コメントを消すまで', max: '同時に出す件数' }
   function applyParams(p) {
     const notes = []
     let count = 0

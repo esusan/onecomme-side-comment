@@ -6,6 +6,7 @@
 //   accent=ffffff ラインの色（#なしの16進）
 //   bg=65        背景の黒の濃さ(0〜100)
 //   side=left    寄せる側（left / right）
+//   newest=bottom 新しいコメントを出す位置（bottom：下に出して上へ積む / top：上に出して下へ積む）
 //   font=udev    udev（同梱のUDEV Gothic・等幅） / bizud（BIZ UDゴシック・等幅） / sans（游ゴシックなど・等幅でない）
 //   icon=1       0でアイコンを出さない
 //   name=1       コメントの上に名前を1行出す（長い名前は省略）。0で出さない
@@ -35,6 +36,7 @@ const BG = num('bg', 65, 0, 100)
 const accentParam = params.get('accent') || ''
 const ACCENT = /^([0-9a-f]{3}|[0-9a-f]{6})$/i.test(accentParam) ? '#' + accentParam : '#ffffff'
 const SIDE = pick('side', 'left', ['left', 'right'])
+const NEWEST = pick('newest', 'bottom', ['bottom', 'top'])
 const FONT = pick('font', 'udev', ['udev', 'bizud', 'sans'])
 const SHOW_ICON = params.get('icon') !== '0'
 const SHOW_NAME = params.get('name') !== '0'
@@ -61,6 +63,7 @@ root.style.setProperty('--comment-font', FONTS[FONT])
 root.style.setProperty('--name-font', Math.round(SIZE * NAME_SCALE / 100) + 'px')
 root.style.setProperty('--name-color', NAME_COLOR === 'accent' ? ACCENT : '#ffffff')
 root.classList.add('side-' + SIDE)
+root.classList.add('newest-' + NEWEST)
 if (SHOW_NAME) root.classList.add('has-name')
 
 // 読み込み時に届く過去分のうち、これより古いもの（前の配信の分など）は出さない
@@ -117,10 +120,12 @@ const app = Vue.createApp({
   },
   computed: {
     // 前の配信の分と、本文のないコメント（金額だけのスパチャなど）は出さない
+    // newest=top のときは新しい順に並べて、上に新しいコメントが出るようにする
     visible() {
-      return this.comments
+      const list = this.comments
         .filter((c) => c.data.comment && ageMs(c, LOADED_AT) < HISTORY_MS && ageMs(c, this.now) < LIFE_MS)
         .slice(-MAX)
+      return NEWEST === 'top' ? list.reverse() : list
     },
   },
   methods: {

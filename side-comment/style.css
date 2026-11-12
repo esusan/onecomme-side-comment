@@ -67,6 +67,12 @@ html, body {
   box-sizing: border-box;
 }
 .side-left .comments { align-items: flex-start; }
+/* newest=top：新しいコメントを上に出して下へ積む。あふれた古いコメントは下の端で薄くして消す */
+.newest-top .container {
+  -webkit-mask: linear-gradient(to top, transparent 0, #000 32px);
+  mask: linear-gradient(to top, transparent 0, #000 32px);
+}
+.newest-top .comments { justify-content: flex-start; }
 
 .comment {
   position: relative;
