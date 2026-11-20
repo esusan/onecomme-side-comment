@@ -29,7 +29,7 @@ function pick(name, def, choices) {
   return choices.includes(v) ? v : def
 }
 
-const SIZE = num('size', 24, 10, 80)
+const SIZE = num('size', 24, 10, 120)
 const COLS = num('cols', 15, 3, 40)
 const LINES = Math.round(num('lines', 3, 1, 20))
 const BG = num('bg', 65, 0, 100)

@@ -197,7 +197,7 @@
     <form class="form" id="form" onsubmit="return false">
       <div class="field">
         <label for="size">文字の大きさ <span class="value" id="size-v"></span></label>
-        <input type="range" id="size" min="14" max="48" step="1" value="24">
+        <input type="range" id="size" min="14" max="120" step="1" value="24">
       </div>
       <div class="field">
         <label for="cols">1行の文字数 <span class="value" id="cols-v"></span></label>
@@ -461,7 +461,13 @@
     clearTimeout(timer)
     timer = setTimeout(() => {
       const frame = $('preview')
+      // 文字が大きくて幅が広いときは、設定欄を押しつぶさないよう縮小して見せる
+      const stage = $('stage')
+      const limit = matchMedia('(max-width: 760px)').matches ? stage.clientWidth : 520
+      const z = Math.min(1, limit / w)
+      frame.style.zoom = z
       frame.style.width = w + 'px'
+      frame.style.height = (stage.clientHeight / z) + 'px'
       // プレビューは全部の設定を付けて開く（テンプレート側の既定値やキャッシュに左右されないように）
       const all = new URLSearchParams()
       for (const k of Object.keys(DEFAULTS)) all.set(k, s[k])
